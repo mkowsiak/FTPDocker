@@ -3,6 +3,10 @@ FROM ubuntu:18.10
 LABEL author="michal@owsiak.org"
 LABEL description="FTP connection test server for NetCAT"
 
+# ssl vs. nossl 
+ARG is_ssl=you_have_to_specify_ssl_settings
+ENV is_ssl_bash $is_ssl
+
 # some interactive settings
 RUN export DEBIAN_FRONTEND=noninteractive
 
@@ -24,29 +28,12 @@ RUN apt-get install -y libapache2-mod-php
 RUN apt-get install -y iproute2
 RUN apt-get install -y ftp
 
-# stolen from here: https://gist.github.com/thbkrkr/aa16435cb6c183e55a33
-RUN openssl rand -base64 48 > passphrase.txt
-RUN openssl genrsa -aes128 -passout file:passphrase.txt -out server.key 2048
-RUN openssl req -new \
-    -passin file:passphrase.txt \
-    -key server.key \
-    -out server.csr \
-    -subj "/C=PL/O=organization/OU=organizational unit/CN=common name"
-RUN cp server.key server.key.org
-RUN openssl rsa \
-    -in server.key.org \
-    -passin file:passphrase.txt \
-    -out server.key
-RUN openssl x509 \
-    -req -days 36500 \
-    -in server.csr \
-    -signkey server.key \
-    -out server.crt
-
-# i will put them in a safe place, where vsftpd will
-# access these
-RUN mv server.crt /etc/ssl/certs/ssl.crt
-RUN mv server.key /etc/ssl/certs/ssl.key
+RUN openssl req -x509 \
+  -nodes \
+  -newkey rsa:2048 \
+  -subj "/C=PL/O=organization/OU=organizational unit/CN=common name" \
+  -keyout /etc/ssl/certs/ssl.key \
+  -out /etc/ssl/certs/ssl.crt -days 365
 
 # create user that will have access to
 # /var/www/html (it can be done better with 
@@ -69,7 +56,9 @@ ADD start.sh /bin/
 RUN chmod +x /bin/start.sh
 
 # make sure to setup vsftpd
-COPY vsftpd.conf /etc/vsftpd.conf
+COPY vsftpd.conf.ssl /etc/vsftpd.conf.ssl
+COPY vsftpd.conf.nossl /etc/vsftpd.conf.nossl
+RUN rm /etc/vsftpd.conf
 
 # init.d script with sleep command
 # that prevents failover during
@@ -85,6 +74,7 @@ RUN echo "ServerName pi" >> /etc/apache2/apache2.conf
 EXPOSE 80
 EXPOSE 20
 EXPOSE 21
+EXPOSE 990
 
 # for passive ftp
 EXPOSE 10090-10100

@@ -1,5 +1,4 @@
 listen=YES
-anonymous_enable=YES
 local_enable=YES
 local_umask=0002
 write_enable=YES
