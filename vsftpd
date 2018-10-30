@@ -46,6 +46,8 @@ case "${1}" in
 		fi
 
 		start-stop-daemon --start --background -m --oknodo --pidfile /var/run/vsftpd/vsftpd.pid --exec ${DAEMON}
+                # I need this one. Otherwise, there is a nasty error that config
+                # file for vsftpd is invalid - probably, some sort of race condition
 		sleep 1
 
 		n=0

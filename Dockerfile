@@ -28,6 +28,12 @@ RUN apt-get install -y libapache2-mod-php
 RUN apt-get install -y iproute2
 RUN apt-get install -y ftp
 
+# i need this one to make this error
+# Can't load /root/.rnd into RNG
+# ... Cannot open file:../crypto/rand/randfile.c:88:Filename=/root/.rnd
+RUN touch /root/.rnd
+
+# key and cert generation
 RUN openssl req -x509 \
   -nodes \
   -newkey rsa:2048 \
@@ -55,14 +61,21 @@ ADD index.php /var/www/html
 ADD start.sh /bin/
 RUN chmod +x /bin/start.sh
 
-# make sure to setup vsftpd
-COPY vsftpd.conf.ssl /etc/vsftpd.conf.ssl
+# make sure to provide vsftpd config
+# files
+COPY vsftpd.conf.explicitssl /etc/vsftpd.conf.explicitssl
+COPY vsftpd.conf.implicitssl /etc/vsftpd.conf.implicitssl
 COPY vsftpd.conf.nossl /etc/vsftpd.conf.nossl
+
+# i am not interested in default one
+# i will create symlink anyway
 RUN rm /etc/vsftpd.conf
 
 # init.d script with sleep command
 # that prevents failover during
 # /etc/init.d/vsftpd start
+# it took me quite some time to understand where
+# error message comes from
 COPY vsftpd /etc/init.d/
 RUN chmod +x /etc/init.d/vsftpd
 
@@ -77,7 +90,7 @@ EXPOSE 21
 EXPOSE 990
 
 # for passive ftp
-EXPOSE 10090-10100
+EXPOSE 21100-21110
 
 # entry point for newly instanced container
 CMD /bin/start.sh
