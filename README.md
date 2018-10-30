@@ -72,10 +72,10 @@ This Docker based FTP tester helps you setup remote machine with `apache2` and `
       -p 21100-21110:21100-21110 \
       ftptest /bin/start.sh implicit_ssl
 
-## Setting up NetBeans FTP connection - explicit ssl
+## Setting up NetBeans FTP connection - implicit ssl
 
 <p align="center">
-  <img src="https://github.com/mkowsiak/FTPDocker/blob/master/images/explicit_ssl.png?raw=true">
+  <img src="https://github.com/mkowsiak/FTPDocker/blob/master/images/implicit_ssl.png?raw=true">
 </p>
 
 # Setting up PHP Remote Project
