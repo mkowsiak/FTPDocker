@@ -3,10 +3,6 @@ FROM ubuntu:18.10
 LABEL author="michal@owsiak.org"
 LABEL description="FTP connection test server for NetCAT"
 
-# ssl vs. nossl 
-ARG is_ssl=you_have_to_specify_ssl_settings
-ENV is_ssl_bash $is_ssl
-
 # some interactive settings
 RUN export DEBIAN_FRONTEND=noninteractive
 
