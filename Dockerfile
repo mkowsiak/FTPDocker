@@ -53,6 +53,7 @@ RUN echo "html:html" | chpasswd html
 # create /var/www/html
 ADD index.php /var/www/html
 ADD subdirs /var/www/html/subdirs
+RUN chown -R html:html /var/www/html
 
 # create startup script
 ADD start.sh /bin/
